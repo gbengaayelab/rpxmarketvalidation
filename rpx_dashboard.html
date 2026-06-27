@@ -22,15 +22,15 @@
   --shadow:0 1px 2px rgba(14,26,43,.04),0 8px 28px rgba(14,26,43,.07);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html,body{height:100%;overflow:hidden;scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);
   -webkit-font-smoothing:antialiased;line-height:1.5}
-.app{display:flex;min-height:100vh}
+.app{display:flex;height:100vh;width:100vw;overflow:hidden;margin:0;padding:0}
 
 /* ============ SPINE / SIDEBAR ============ */
 .spine{width:256px;flex-shrink:0;background:var(--ink);color:#dfe6ee;position:fixed;top:0;left:0;
   height:100vh;display:flex;flex-direction:column;padding:26px 0 18px;z-index:50;
-  border-right:1px solid var(--ink-2)}
+  border-right:1px solid var(--ink-2);overflow:hidden}
 .brand{padding:0 26px 22px}
 .brand .mark{display:flex;align-items:center;gap:11px}
 .brand .glyph{width:34px;height:34px;border:1.6px solid var(--green);border-radius:8px;
@@ -56,8 +56,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .stamp-mini .val b{color:var(--green)}
 
 /* ============ CANVAS ============ */
-.canvas{margin-left:256px;flex:1;min-width:0}
-.page{display:none;padding:40px 48px 80px;max-width:1280px;animation:fade .4s ease}
+.canvas{margin-left:256px;flex:1;min-width:0;height:100vh;overflow-y:auto;overflow-x:hidden;padding:0}
+.page{display:none;padding:40px 48px 80px;max-width:1280px;min-height:100%;animation:fade .4s ease}
 .page.show{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .phead{margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:22px}
@@ -233,7 +233,7 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
 }
 @media(max-width:860px){
   .spine{transform:translateX(-100%);transition:.3s} .spine.open{transform:none}
-  .canvas{margin-left:0} .page{padding:24px 20px 60px}
+  .canvas{margin-left:0;height:100vh} .page{padding:24px 20px 60px}
   .g2,.g3,.g4{grid-template-columns:1fr} .verdict-banner{flex-direction:column;align-items:flex-start}
   .mobile-toggle{display:grid!important}
 }
