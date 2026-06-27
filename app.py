@@ -16,13 +16,13 @@ def render_app() -> None:
     st.markdown(
         """
         <style>
-          html, body {height: 100%; overflow: hidden;}
+          html, body {min-height: 100%; overflow-x: hidden; overflow-y: auto;}
           #MainMenu {visibility: hidden;}
           footer {visibility: hidden;}
           header {visibility: hidden;}
           .stMainBlockContainer {padding: 0; margin: 0;}
-          .block-container {padding: 0; margin: 0; width: 100vw;}
-          iframe {display: block; width: 100vw; height: 100vh; border: none;}
+          .block-container {padding: 0; margin: 0; width: 100%;}
+          iframe {display: block; width: 100%; min-height: 100vh; border: none;}
         </style>
         """,
         unsafe_allow_html=True,
@@ -30,7 +30,7 @@ def render_app() -> None:
 
     html_path = Path(__file__).with_name("rpx_dashboard.html")
     html = html_path.read_text(encoding="utf-8")
-    components.html(html, height=1200, scrolling=False)
+    components.html(html, height=1800, scrolling=True)
 
 
 if __name__ == "__main__":
