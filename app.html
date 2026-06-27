@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPX — Market Validation · Investment Decision Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#0E1A2B; --ink-2:#091018; --ink-soft:#16263b;
+  --paper:#F2EEE4; --paper-2:#EBE5D7;
+  --card:#FFFFFF; --card-2:#FBF9F3;
+  --green:#1FA97E; --green-d:#147a5b; --green-l:#e3f4ee;
+  --brass:#BE8A24; --brass-l:#f6ecd4;
+  --coral:#D45B45; --coral-l:#fae4df;
+  --blue:#3E6E9E; --blue-l:#e3edf5;
+  --slate:#5E6E7D; --slate-2:#8494a2;
+  --line:#E2DBCD; --line-spine:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(14,26,43,.04),0 8px 28px rgba(14,26,43,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+.app{display:flex;min-height:100vh}
+
+/* ============ SPINE / SIDEBAR ============ */
+.spine{width:256px;flex-shrink:0;background:var(--ink);color:#dfe6ee;position:fixed;top:0;left:0;
+  height:100vh;display:flex;flex-direction:column;padding:26px 0 18px;z-index:50;
+  border-right:1px solid var(--ink-2)}
+.brand{padding:0 26px 22px}
+.brand .mark{display:flex;align-items:center;gap:11px}
+.brand .glyph{width:34px;height:34px;border:1.6px solid var(--green);border-radius:8px;
+  display:grid;place-items:center;font-family:'Space Grotesk';font-weight:700;font-size:17px;color:var(--green)}
+.brand .name{font-family:'Space Grotesk';font-weight:700;font-size:20px;letter-spacing:.5px;color:#fff}
+.brand .sub{font-family:'IBM Plex Mono';font-size:9.5px;letter-spacing:2.4px;color:var(--slate-2);
+  text-transform:uppercase;margin-top:7px;padding-left:1px}
+.nav{flex:1;padding:14px 14px;overflow-y:auto}
+.nav::-webkit-scrollbar{width:0}
+.nav-btn{display:flex;align-items:center;gap:13px;width:100%;background:none;border:none;cursor:pointer;
+  color:#9fb0c0;text-align:left;padding:10px 12px;border-radius:9px;font-family:'Inter';font-size:13.5px;
+  font-weight:500;transition:.16s;margin-bottom:2px}
+.nav-btn .num{font-family:'IBM Plex Mono';font-size:11px;color:var(--slate-2);width:18px;flex-shrink:0}
+.nav-btn:hover{background:var(--ink-soft);color:#eaf0f6}
+.nav-btn.active{background:linear-gradient(90deg,rgba(31,169,126,.16),transparent);color:#fff}
+.nav-btn.active .num{color:var(--green)}
+.nav-btn.active{box-shadow:inset 2px 0 0 var(--green)}
+.spine-foot{padding:16px 22px 4px;border-top:1px solid var(--line-spine);margin:0 14px}
+.stamp-mini{display:flex;align-items:center;gap:13px;cursor:pointer}
+.stamp-mini svg{flex-shrink:0}
+.stamp-mini .lbl{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1.6px;color:var(--slate-2);text-transform:uppercase}
+.stamp-mini .val{font-family:'Space Grotesk';font-weight:700;font-size:15px;color:#fff;margin-top:2px}
+.stamp-mini .val b{color:var(--green)}
+
+/* ============ CANVAS ============ */
+.canvas{margin-left:256px;flex:1;min-width:0}
+.page{display:none;padding:40px 48px 80px;max-width:1280px;animation:fade .4s ease}
+.page.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.phead{margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:22px}
+.eyebrow{font-family:'IBM Plex Mono';font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--brass);font-weight:600;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:26px;height:1.5px;background:var(--brass)}
+.ptitle{font-family:'Space Grotesk';font-weight:700;font-size:33px;letter-spacing:-.6px;margin-top:13px;
+  line-height:1.1}
+.psub{color:var(--slate);font-size:15px;margin-top:9px;max-width:760px}
+
+/* ============ GRID & CARDS ============ */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+  box-shadow:var(--shadow)}
+.card-title{font-family:'Space Grotesk';font-weight:600;font-size:15.5px;display:flex;align-items:center;
+  justify-content:space-between;gap:8px}
+.card-sub{font-size:12px;color:var(--slate-2);margin-top:3px;margin-bottom:14px;font-weight:400}
+.chart-wrap{position:relative;width:100%}
+
+/* ============ KPI CARDS ============ */
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px 17px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--brass)}
+.kpi.green::after{background:var(--green)}
+.kpi .klabel{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--slate-2);font-weight:500}
+.kpi .knum{font-family:'Space Grotesk';font-weight:700;font-size:34px;letter-spacing:-1px;margin-top:9px;
+  line-height:1}
+.kpi .ksub{font-size:11.5px;color:var(--slate);margin-top:7px}
+.kpi.verdict{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;border:none}
+.kpi.verdict::after{display:none}
+.kpi.verdict .klabel{color:rgba(255,255,255,.8)}
+.kpi.verdict .knum{font-size:30px;color:#fff}
+.kpi.verdict .ksub{color:rgba(255,255,255,.92)}
+
+/* ============ INSIGHT CALLOUT ============ */
+.insight{background:var(--card-2);border:1px solid var(--line);border-left:3px solid var(--brass);
+  border-radius:0 11px 11px 0;padding:15px 19px;margin-top:18px;display:flex;gap:13px;align-items:flex-start}
+.insight .ico{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:1.5px;color:var(--brass);
+  font-weight:600;flex-shrink:0;text-transform:uppercase;padding-top:2px}
+.insight p{font-size:13.5px;color:var(--ink);line-height:1.55}
+.insight.green{border-left-color:var(--green)} .insight.green .ico{color:var(--green-d)}
+.insight.coral{border-left-color:var(--coral)} .insight.coral .ico{color:var(--coral)}
+
+/* ============ VERDICT BANNER ============ */
+.verdict-banner{background:var(--ink);color:#fff;border-radius:16px;padding:30px 34px;display:flex;
+  align-items:center;gap:34px;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(14,26,43,.22)}
+.verdict-banner::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 88% 18%,rgba(31,169,126,.22),transparent 52%)}
+.verdict-banner>*{position:relative;z-index:1}
+.vb-text{flex:1}
+.vb-text .lead{font-family:'IBM Plex Mono';font-size:11px;letter-spacing:2.6px;color:var(--green);
+  text-transform:uppercase;font-weight:600}
+.vb-text h2{font-family:'Space Grotesk';font-weight:700;font-size:27px;margin-top:11px;line-height:1.18}
+.vb-text h2 em{font-style:normal;color:var(--green)}
+.vb-text p{color:#b8c4d0;font-size:14px;margin-top:11px;max-width:620px}
+.vb-meta{display:flex;gap:30px;margin-top:18px}
+.vb-meta div .n{font-family:'Space Grotesk';font-weight:700;font-size:23px}
+.vb-meta div .l{font-family:'IBM Plex Mono';font-size:9.5px;letter-spacing:1.2px;color:var(--slate-2);
+  text-transform:uppercase;margin-top:3px}
+
+/* ============ STAMP (signature) ============ */
+.stamp-ring{transform-origin:center;animation:spin 34s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.stamp-ring{animation:none}}
+
+/* ============ BAR LIST ============ */
+.barlist{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.barrow{display:grid;grid-template-columns:1fr;gap:5px}
+.barrow .bl{display:flex;justify-content:space-between;font-size:12.5px}
+.barrow .bl .nm{color:var(--ink);font-weight:500}
+.barrow .bl .vl{font-family:'IBM Plex Mono';color:var(--slate);font-size:11.5px}
+.bartrack{height:8px;background:var(--paper-2);border-radius:5px;overflow:hidden}
+.barfill{height:100%;border-radius:5px;background:var(--green)}
+
+/* ============ TAGS / PILLS ============ */
+.pill{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono';font-size:10px;
+  letter-spacing:.6px;text-transform:uppercase;padding:4px 9px;border-radius:20px;font-weight:600}
+.pill.core{background:var(--green-l);color:var(--green-d)}
+.pill.add{background:var(--brass-l);color:var(--brass)}
+.pill.later{background:var(--paper-2);color:var(--slate)}
+.pill.high{background:var(--coral-l);color:var(--coral)}
+.pill.med{background:var(--blue-l);color:var(--blue)}
+
+/* ============ TABLE / MATRIX ============ */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--slate-2);font-weight:600;text-align:left;padding:0 14px 11px;border-bottom:1.5px solid var(--line)}
+tbody td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--card-2)}
+td.strong{font-weight:600;font-family:'Space Grotesk'}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%}
+.check{color:var(--green);font-weight:700} .cross{color:var(--coral-l);color:#c9beb0} .partial{color:var(--brass)}
+
+/* ============ PERSONA CARDS ============ */
+.persona{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:var(--shadow);display:flex;flex-direction:column}
+.persona .ptop{padding:18px 20px 16px;background:var(--ink);color:#fff;position:relative}
+.persona .pavatar{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  font-family:'Space Grotesk';font-weight:700;font-size:17px;color:var(--ink);margin-bottom:12px}
+.persona h4{font-family:'Space Grotesk';font-weight:700;font-size:17px}
+.persona .pev{font-family:'IBM Plex Mono';font-size:10px;color:var(--green);margin-top:5px;letter-spacing:.5px}
+.persona .pbody{padding:16px 20px 18px;flex:1;display:flex;flex-direction:column;gap:11px}
+.persona .prow .k{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--slate-2)} .persona .prow .v{font-size:13px;margin-top:3px}
+.persona .pcta{margin-top:auto;padding-top:8px}
+.persona .pcta .btn{display:block;text-align:center;background:var(--green-l);color:var(--green-d);
+  border-radius:8px;padding:9px;font-size:12.5px;font-weight:600;font-family:'Space Grotesk'}
+
+/* ============ QUOTE PANEL ============ */
+.quote-panel{background:var(--ink);color:#fff;border-radius:16px;padding:0;overflow:hidden;
+  display:grid;grid-template-columns:200px 1fr;min-height:230px}
+.qp-nav{background:var(--ink-2);padding:20px 16px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;max-height:320px}
+.qp-nav::-webkit-scrollbar{width:0}
+.qp-tab{background:none;border:none;color:#8da0b2;text-align:left;cursor:pointer;padding:9px 11px;
+  border-radius:8px;font-size:11.5px;font-family:'Inter';font-weight:500;transition:.15s;line-height:1.3}
+.qp-tab:hover{background:var(--ink-soft);color:#fff}
+.qp-tab.active{background:var(--green);color:#fff}
+.qp-body{padding:28px 32px;display:flex;flex-direction:column;justify-content:center}
+.qp-mark{font-family:'Space Grotesk';font-size:46px;color:var(--green);line-height:.6;height:24px}
+.qp-text{font-size:17px;line-height:1.6;color:#eef3f8;margin:8px 0 16px;font-weight:400}
+.qp-meta{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.qp-meta .m{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.8px;padding:4px 9px;border-radius:6px;
+  background:var(--ink-soft);color:#b8c8d6;text-transform:uppercase}
+.qp-meta .m.sent{background:rgba(31,169,126,.16);color:var(--green)}
+
+/* ============ FUNNEL ============ */
+.funnel{display:flex;flex-direction:column;align-items:center;gap:9px;padding:8px 0}
+.ftier{color:#fff;border-radius:9px;padding:15px 20px;text-align:center;position:relative;
+  display:flex;flex-direction:column;align-items:center;box-shadow:var(--shadow)}
+.ftier .ft-l{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:1.6px;text-transform:uppercase;opacity:.85}
+.ftier .ft-v{font-family:'Space Grotesk';font-weight:700;font-size:25px;margin-top:3px}
+.ftier .ft-d{font-size:11.5px;opacity:.9;margin-top:4px}
+
+/* ============ SCORECARD ============ */
+.score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.score-item{display:flex;align-items:center;gap:14px;padding:13px 15px;background:var(--card-2);
+  border:1px solid var(--line);border-radius:11px}
+.score-ring{flex-shrink:0}
+.score-item .si-l{font-size:12.5px;font-weight:600;font-family:'Space Grotesk'}
+.score-item .si-s{font-size:11px;color:var(--slate);margin-top:2px}
+
+/* ============ MISC ============ */
+.flowstages{display:flex;align-items:stretch;gap:0;margin-top:6px}
+.flowstage{flex:1;text-align:center;padding:14px 8px;position:relative}
+.flowstage:not(:last-child)::after{content:"›";position:absolute;right:-7px;top:50%;transform:translateY(-50%);
+  color:var(--slate-2);font-size:20px;z-index:2}
+.flowstage .fbar{height:6px;border-radius:4px;background:var(--green);margin-bottom:10px;opacity:.9}
+.flowstage .fn{font-family:'Space Grotesk';font-weight:700;font-size:22px}
+.flowstage .fl{font-size:11px;color:var(--slate);margin-top:4px;line-height:1.3}
+.findings{display:flex;flex-direction:column;gap:0}
+.finding{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.finding:last-child{border-bottom:none}
+.finding .fnum{font-family:'Space Grotesk';font-weight:700;font-size:20px;color:var(--brass);
+  width:34px;flex-shrink:0}
+.finding .ftitle{font-family:'Space Grotesk';font-weight:600;font-size:15px}
+.finding .fdesc{font-size:13px;color:var(--slate);margin-top:4px;line-height:1.55}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:13px;font-size:11.5px;color:var(--slate)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.assume{font-family:'IBM Plex Mono';font-size:10px;color:var(--slate-2);background:var(--paper-2);
+  display:inline-block;padding:3px 8px;border-radius:5px;letter-spacing:.5px;margin-top:10px}
+.mapwrap{display:flex;gap:20px;align-items:center}
+.region:hover{filter:brightness(1.08);cursor:pointer}
+.note{font-size:11.5px;color:var(--slate-2);margin-top:13px;font-style:italic}
+
+@media(max-width:1080px){
+  .g4{grid-template-columns:1fr 1fr} .g3{grid-template-columns:1fr 1fr}
+  .quote-panel{grid-template-columns:1fr} .qp-nav{flex-direction:row;flex-wrap:wrap;max-height:none}
+}
+@media(max-width:860px){
+  .spine{transform:translateX(-100%);transition:.3s} .spine.open{transform:none}
+  .canvas{margin-left:0} .page{padding:24px 20px 60px}
+  .g2,.g3,.g4{grid-template-columns:1fr} .verdict-banner{flex-direction:column;align-items:flex-start}
+  .mobile-toggle{display:grid!important}
+}
+.mobile-toggle{display:none;position:fixed;top:14px;right:14px;z-index:60;width:44px;height:44px;
+  background:var(--ink);color:#fff;border:none;border-radius:11px;place-items:center;cursor:pointer;font-size:20px}
+</style>
+</head>
+<body>
+<button class="mobile-toggle" onclick="document.querySelector('.spine').classList.toggle('open')">☰</button>
+<div class="app">
+<!-- ================= SPINE ================= -->
+<aside class="spine">
+  <div class="brand">
+    <div class="mark">
+      <div class="glyph">R</div>
+      <div class="name">RPX</div>
+    </div>
+    <div class="sub">Market Validation · Day 1</div>
+  </div>
+  <nav class="nav" id="nav">
+    <button class="nav-btn active" data-p="0"><span class="num">01</span> Executive Overview</button>
+    <button class="nav-btn" data-p="1"><span class="num">02</span> Voice of Customer</button>
+    <button class="nav-btn" data-p="2"><span class="num">03</span> Customer Personas</button>
+    <button class="nav-btn" data-p="3"><span class="num">04</span> Market Demand</button>
+    <button class="nav-btn" data-p="4"><span class="num">05</span> Market Opportunity</button>
+    <button class="nav-btn" data-p="5"><span class="num">06</span> Product Prioritisation</button>
+    <button class="nav-btn" data-p="6"><span class="num">07</span> Government Evidence</button>
+    <button class="nav-btn" data-p="7"><span class="num">08</span> Recommendation</button>
+  </nav>
+  <div class="spine-foot">
+    <div class="stamp-mini" onclick="go(7)">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="24" fill="none" stroke="rgba(31,169,126,.35)" stroke-width="1"/>
+        <circle class="stamp-ring" cx="26" cy="26" r="20" fill="none" stroke="#1FA97E" stroke-width="1.4" stroke-dasharray="3 4"/>
+        <path d="M19 26l5 5 9-11" fill="none" stroke="#1FA97E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="lbl">Verdict</div>
+        <div class="val"><b>GO</b> · 82%</div>
+      </div>
+    </div>
+  </div>
+</aside>
+<main class="canvas">
+<!-- ============ PAGE 1: EXECUTIVE OVERVIEW ============ -->
+<section class="page show" id="page-0">
+  <div class="phead">
+    <div class="eyebrow">Page 01 · Investment Decision</div>
+    <h1 class="ptitle">Should RPX proceed to MVP?</h1>
+    <p class="psub">A one-screen verdict for founders and investors, built from 1,211 real customer discussions, official UK Government survey data, ONS market figures and five years of search demand.</p>
+  </div>
+
+  <div class="verdict-banner" style="margin-bottom:24px">
+    <svg width="120" height="120" viewBox="0 0 120 120" style="flex-shrink:0">
+      <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(31,169,126,.25)" stroke-width="1.5"/>
+      <circle class="stamp-ring" cx="60" cy="60" r="48" fill="none" stroke="#1FA97E" stroke-width="1.5" stroke-dasharray="4 6"/>
+      <text x="60" y="46" text-anchor="middle" fill="#7fe8c4" font-family="IBM Plex Mono" font-size="7.5" letter-spacing="2">VALIDATION</text>
+      <path d="M44 60l11 11 21-25" fill="none" stroke="#1FA97E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="60" y="92" text-anchor="middle" fill="#7fe8c4" font-family="IBM Plex Mono" font-size="7.5" letter-spacing="2">APPROVED</text>
+    </svg>
+    <div class="vb-text">
+      <div class="lead">Recommendation</div>
+      <h2><em>GO</em> — Proceed to MVP around pre-purchase renovation cost clarity</h2>
+      <p>Evidence converges across customer language, official repair-satisfaction data, a £36bn market and steady, cost-led search demand. The strongest, clearest pain — knowing true renovation cost before committing to a purchase — is concrete, widespread and directly monetisable.</p>
+      <div class="vb-meta">
+        <div><div class="n">1,211</div><div class="l">Discussions analysed</div></div>
+        <div><div class="n">43.7%</div><div class="l">Share on core pain</div></div>
+        <div><div class="n">£36.0bn</div><div class="l">UK R&M market</div></div>
+        <div><div class="n">High</div><div class="l">Evidence confidence</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-bottom:18px">
+    <div class="kpi"><div class="klabel">Customer Discussions</div><div class="knum">1,211</div><div class="ksub">Classified & enriched evidence rows</div></div>
+    <div class="kpi"><div class="klabel">Research Sources</div><div class="knum">18</div><div class="ksub">12 communities · 6 official datasets</div></div>
+    <div class="kpi"><div class="klabel">Customer Segments</div><div class="knum">3</div><div class="ksub">Investors · Landlords · Homeowners</div></div>
+    <div class="kpi"><div class="klabel">Pain Categories</div><div class="knum">9</div><div class="ksub">Refined pain taxonomy</div></div>
+    <div class="kpi green"><div class="klabel">Confidence Level</div><div class="knum">High · 82%</div><div class="ksub">4 of 7 streams rated High</div></div>
+    <div class="kpi verdict"><div class="klabel">MVP Recommendation</div><div class="knum">GO ✓</div><div class="ksub">Build & ad-test the cost estimator</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Pain Category Distribution</div>
+      <div class="card-sub">Share of all 1,211 discussions by refined pain tag — one theme dominates</div>
+      <div class="chart-wrap" style="height:280px"><canvas id="c_pain"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Customer Segment Distribution</div>
+      <div class="card-sub">Who is talking — by audience type detected in the evidence</div>
+      <div class="chart-wrap" style="height:280px"><canvas id="c_seg"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card">
+      <div class="card-title">Research Source Distribution</div>
+      <div class="card-sub">18 sources across communities & official data</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="c_src"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sentiment Distribution</div>
+      <div class="card-sub">Tone of customer discussions</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="c_sent"></canvas></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column">
+      <div class="card-title">Why this is a GO</div>
+      <div class="card-sub">The three signals that align</div>
+      <div class="barlist" style="margin-top:8px">
+        <div class="insight green" style="margin-top:0"><span class="ico">Pain</span><p>43.7% of all talk is about one need: a credible cost estimate before buying.</p></div>
+        <div class="insight" style="margin-top:0"><span class="ico">Proof</span><p>Official data confirms it — 33.9% of owner-occupiers are dissatisfied with repairs.</p></div>
+        <div class="insight green" style="margin-top:0"><span class="ico">Demand</span><p>Search is cost-led and rising across all four UK nations.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE 2: VOICE OF CUSTOMER ============ -->
+<section class="page" id="page-1">
+  <div class="phead">
+    <div class="eyebrow">Page 02 · Voice of Customer</div>
+    <h1 class="ptitle">What customers actually say</h1>
+    <p class="psub">Unprompted, in their own words. The pain is concrete and repeated: people want a fast, credible cost range — and protection from hidden works — before they commit money to a property.</p>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Top Pain Categories</div>
+      <div class="card-sub">Ranked by volume of discussions</div>
+      <div class="chart-wrap" style="height:300px"><canvas id="c_painbar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Urgency vs RPX Relevance</div>
+      <div class="card-sub">Bubble size = discussion volume · top-right = build-worthy</div>
+      <div class="chart-wrap" style="height:300px"><canvas id="c_scatter"></canvas></div>
+      <div class="legend"><span>Bubble size reflects how many people raised it. Contractor-quote &amp; finance pains score highest on urgency × relevance.</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-title">Customer Journey Stage</div>
+    <div class="card-sub">Where in the buying journey the pain surfaces — overwhelmingly before purchase, where RPX can intervene</div>
+    <div class="flowstages" id="flow"></div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Top Customer Objections</div>
+      <div class="card-sub">What sceptics say — and how RPX answers</div>
+      <table id="t_obj"><thead><tr><th>Objection</th><th>Response angle</th><th>Pri</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Customer Language</div>
+      <div class="card-sub">Verbatim phrases for landing-page & ad copy (by occurrence)</div>
+      <div class="barlist" id="lang"></div>
+    </div>
+  </div>
+
+  <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0">
+    <div class="card-title" style="margin-bottom:4px">Representative customer quotes</div>
+    <div class="card-sub" style="margin-bottom:14px">Select a pain category to hear the customer in their own words — drawn from the Quote Capture set</div>
+    <div class="quote-panel">
+      <div class="qp-nav" id="qpnav"></div>
+      <div class="qp-body">
+        <div class="qp-mark">&ldquo;</div>
+        <div class="qp-text" id="qptext"></div>
+        <div class="qp-meta" id="qpmeta"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ============ PAGE 3: PERSONAS ============ -->
+<section class="page" id="page-2">
+  <div class="phead">
+    <div class="eyebrow">Page 03 · Customer Personas</div>
+    <h1 class="ptitle">Four personas, one buying moment</h1>
+    <p class="psub">Each persona is anchored to real evidence volume. They differ in motive, but share the pre-purchase moment where RPX is most useful — and most monetisable. Start with the First-time Renovating Buyer.</p>
+  </div>
+  <div class="grid g4" id="personas" style="margin-bottom:18px"></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">Persona Pain &amp; Evidence Strength</div>
+      <div class="card-sub">Discussion volume backing each persona's primary need</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="c_persona"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Persona Goals Matrix</div>
+      <div class="card-sub">Main need vs main fear — the gap RPX closes</div>
+      <table id="t_goals"><thead><tr><th>Persona</th><th>Wants</th><th>Fears</th><th>Pri</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <div class="insight green"><span class="ico">Read</span><p>The First-time Renovating Buyer is the sharpest wedge: 529 discussions, a high-priority rating, a clear fear ("buying a money pit") and a Google-search channel that is cheap to test. Win them first, then expand to investors and landlords.</p></div>
+</section>
+
+<!-- ============ PAGE 4: MARKET DEMAND ============ -->
+<section class="page" id="page-3">
+  <div class="phead">
+    <div class="eyebrow">Page 04 · Market Demand</div>
+    <h1 class="ptitle">Demand is real, rising and cost-led</h1>
+    <p class="psub">Five years of Google search data show steady, growing interest in renovation across every UK nation — and the language is explicitly about cost. That is exactly the demand RPX converts.</p>
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-title">Search Interest Over Time</div>
+    <div class="card-sub">UK Google Trends index, quarterly average · Jun 2021 – Jun 2026</div>
+    <div class="chart-wrap" style="height:300px"><canvas id="c_trends"></canvas></div>
+  </div>
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Regional Demand</div>
+      <div class="card-sub">"Home improvement" search index by nation — interest spreads UK-wide</div>
+      <div class="mapwrap" id="ukmap"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Search Interest by Category</div>
+      <div class="card-sub">Average index across the five tracked renovation themes</div>
+      <div class="chart-wrap" style="height:255px"><canvas id="c_cat"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Related Search Terms</div>
+    <div class="card-sub">Top related queries — note how "cost" dominates intent</div>
+    <table id="t_rq"><thead><tr><th>Related query</th><th>Theme</th><th>Intent</th><th>Index</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="insight"><span class="ico">Demand</span><p>The top related query for roof replacement is literally "cost roof replacement" (index 100). Search demand is problem-aware and price-anxious — a paid-search and cost-page strategy maps directly onto it.</p></div>
+</section>
+
+<!-- ============ PAGE 5: MARKET OPPORTUNITY ============ -->
+<section class="page" id="page-4">
+  <div class="phead">
+    <div class="eyebrow">Page 05 · Market Opportunity</div>
+    <h1 class="ptitle">A large spend pool, an unfilled gap</h1>
+    <p class="psub">RPX sits beside a £36bn annual UK repair-and-maintenance market. The opportunity is not to capture that spend, but to own the decision moment before it — where today's tools are slow, generic or absent.</p>
+  </div>
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Market Sizing — TAM / SAM / SOM</div>
+      <div class="card-sub">From total market spend to a realistic early-traction target</div>
+      <div class="funnel" id="funnel"></div>
+      <div class="assume">Illustrative model · TAM = ONS 2022 (actual). SAM/SOM modelled on ~1.1m annual UK transactions, ~35% renovating, refine with Day-2 CAC data.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Opportunity Scorecard</div>
+      <div class="card-sub">How attractive is this market on the dimensions investors weigh</div>
+      <div class="score-grid" id="scorecard"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Competitive Landscape</div>
+    <div class="card-sub">Indicative positioning — RPX's gap is fast, pre-purchase cost + risk clarity (to validate in Day 2)</div>
+    <table id="t_comp"><thead><tr><th>Solution</th><th>Pre-purchase speed</th><th>Cost range</th><th>Hidden-risk flag</th><th>Regional adjust</th><th>ROI model</th></tr></thead><tbody></tbody></table>
+    <div class="legend">
+      <span><b class="check">●</b> Strong</span><span><b class="partial">●</b> Partial</span><span><b style="color:#c9beb0">●</b> Absent</span>
+    </div>
+  </div>
+  <div class="insight green"><span class="ico">Gap</span><p>No incumbent combines speed, a credible cost range and hidden-risk flags at the pre-offer moment. Surveyors are slow and post-offer; calculators are generic; spreadsheets are manual. RPX's wedge is the fast first-pass estimate buyers ask for repeatedly.</p></div>
+</section>
+<!-- ============ PAGE 6: PRODUCT PRIORITISATION ============ -->
+<section class="page" id="page-5">
+  <div class="phead">
+    <div class="eyebrow">Page 06 · Product Prioritisation</div>
+    <h1 class="ptitle">What to build first</h1>
+    <p class="psub">Every feature is scored on the evidence behind it. Three features clear the bar for the MVP core; the rest are sequenced as add-ons or parked. The scope is deliberately narrow and testable in days, not months.</p>
+  </div>
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Feature Priority by Evidence</div>
+      <div class="card-sub">Supporting discussions per feature · colour = MVP decision</div>
+      <div class="chart-wrap" style="height:300px"><canvas id="c_feat"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pain-to-Feature Mapping</div>
+      <div class="card-sub">Each MVP feature answers a specific, evidenced customer pain</div>
+      <table id="t_map"><thead><tr><th>Customer pain</th><th>Feature</th><th>Decision</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">MVP Scope</div>
+    <div class="card-sub">The three-feature core that 71% of all evidence points to — plus what waits</div>
+    <div class="grid g3" id="mvpscope" style="margin-top:4px"></div>
+  </div>
+  <div class="insight green"><span class="ico">Scope</span><p>The MVP is a landing page + waitlist around three features — cost estimator, hidden-risk checker and budget planner — covering 809 of 1,211 discussions (71%). Validate intent with clicks and waitlist conversions before writing estimation logic.</p></div>
+</section>
+
+<!-- ============ PAGE 7: GOVERNMENT & INDUSTRY EVIDENCE ============ -->
+<section class="page" id="page-6">
+  <div class="phead">
+    <div class="eyebrow">Page 07 · Government &amp; Industry Evidence</div>
+    <h1 class="ptitle">The pain shows up in official data too</h1>
+    <p class="psub">This isn't just Reddit. The English Housing Survey and ONS construction statistics independently confirm widespread repair dissatisfaction and a large, growing spend pool — the proof investors need beyond customer chatter.</p>
+  </div>
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Repair Dissatisfaction — Owner Occupiers</div>
+      <div class="card-sub">% dissatisfied with repair handling · English Housing Survey FA5431</div>
+      <div class="chart-wrap" style="height:265px"><canvas id="c_fa"></canvas></div>
+      <div class="note">Latest year (2022-23): 33.9% of owner-occupiers and 24.8% of all households reported dissatisfaction.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Reasons for Dissatisfaction</div>
+      <div class="card-sub">Why repairs disappoint · EHS FA5441 (2022-23)</div>
+      <div class="chart-wrap" style="height:265px"><canvas id="c_fa2"></canvas></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-title">UK Housing Repair &amp; Maintenance Output</div>
+    <div class="card-sub">ONS construction output, £bn · 1997–2022 — a large, structurally growing market</div>
+    <div class="chart-wrap" style="height:285px"><canvas id="c_ons"></canvas></div>
+  </div>
+  <div class="grid g3">
+    <div class="kpi green"><div class="klabel">Total R&amp;M Output 2022</div><div class="knum">£36.0bn</div><div class="ksub">All-time high · +11% on 2021</div></div>
+    <div class="kpi"><div class="klabel">All Households Dissatisfied</div><div class="knum">24.8%</div><div class="ksub">With repair handling, 2022-23</div></div>
+    <div class="kpi"><div class="klabel">Private R&amp;M Share 2022</div><div class="knum">£29.0bn</div><div class="ksub">80% of spend is private housing</div></div>
+  </div>
+  <div class="insight"><span class="ico">Proof</span><p>Two of the top three dissatisfaction reasons — slow work and bare-minimum effort — are exactly the hidden-risk and reliability fears customers voice on Reddit. Official and behavioural evidence tell the same story.</p></div>
+</section>
+
+<!-- ============ PAGE 8: RECOMMENDATION ============ -->
+<section class="page" id="page-7">
+  <div class="phead">
+    <div class="eyebrow">Page 08 · Recommendation</div>
+    <h1 class="ptitle">The decision</h1>
+    <p class="psub">Five evidence streams point the same way. The recommendation is to proceed — with a narrow, fast, falsifiable first test.</p>
+  </div>
+  <div class="verdict-banner" style="margin-bottom:22px">
+    <svg width="110" height="110" viewBox="0 0 120 120" style="flex-shrink:0">
+      <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(31,169,126,.25)" stroke-width="1.5"/>
+      <circle class="stamp-ring" cx="60" cy="60" r="48" fill="none" stroke="#1FA97E" stroke-width="1.5" stroke-dasharray="4 6"/>
+      <text x="60" y="44" text-anchor="middle" fill="#7fe8c4" font-family="IBM Plex Mono" font-size="7" letter-spacing="2">RPX · DAY 1</text>
+      <path d="M44 60l11 11 21-25" fill="none" stroke="#1FA97E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="60" y="94" text-anchor="middle" fill="#7fe8c4" font-family="IBM Plex Mono" font-size="7" letter-spacing="2">PROCEED</text>
+    </svg>
+    <div class="vb-text">
+      <div class="lead">Final Recommendation · GO</div>
+      <h2>Validate RPX around <em>pre-purchase renovation cost clarity</em></h2>
+      <p>Build a landing-page MVP and run a Day-2 outreach and ad-test sprint. The bar to advance: meaningful intent (clicks + waitlist sign-ups), not page views. If intent clears threshold, build the estimator logic; if not, the test was cheap.</p>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title" style="color:var(--green-d)">✓ Key Findings</div>
+      <div class="card-sub">What the evidence establishes</div>
+      <div class="findings" id="findings"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--coral)">⚠ Risks &amp; Watch-outs</div>
+      <div class="card-sub">What could undermine the thesis — and the mitigation</div>
+      <div class="findings" id="risks"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Recommended MVP Scope &amp; Next Actions</div>
+    <div class="card-sub">A focused, days-not-months test plan</div>
+    <div class="grid g3" id="nextactions" style="margin-top:4px"></div>
+  </div>
+  <div class="insight green"><span class="ico">Bottom line</span><p>The clearest problem (cost uncertainty), the most represented buyer (the renovating purchaser), official corroboration and rising cost-led search all align. Proceed to MVP — narrow scope, fast test, clear kill-criteria.</p></div>
+</section>
+
+</main></div>
+<script>
+/* ===================== REAL DATA (from RPX workbook) ===================== */
+const PAL={green:'#1FA97E',green2:'#2E8B72',brass:'#BE8A24',brass2:'#D9A441',blue:'#3E6E9E',
+  blue2:'#5E8CB5',coral:'#D45B45',slate:'#8494a2',taupe:'#B0825A'};
+const PAINPAL=['#1FA97E','#2E8B72','#BE8A24','#D9A441','#3E6E9E','#5E8CB5','#B0825A','#D45B45','#8494a2'];
+
+const D={
+ pain:[['Initial renovation cost estimate',529,43.7],['Finance planning',140,11.6],['ROI / value uplift',132,10.9],
+  ['Regional pricing & spec variability',124,10.2],['Renovation sequencing',91,7.5],['Scope definition',76,6.3],
+  ['Scope & hidden risk',73,6.0],['Contractor quote validation',31,2.6],['General renovation research',15,1.2]],
+ seg:[['UK property renovator / buyer',878],['Landlord / Buy-to-let investor',141],['Homebuyer',112],
+  ['Property investor',73],['First-time buyer / homeowner',7]],
+ src:[['Reddit communities',5],['Google Trends datasets',3],['Government (EHS & GOV.UK)',3],
+  ['Forums',2],['Property platforms & tools',2],['Planning & video',2],['ONS construction',1]],
+ sent:[['Neutral',736],['Neutral / conditional',317],['Concerned',104],['Positive / helpful',54]],
+ journey:[['Early research',602],['Budgeting & feasibility',378],['Pre-purchase due diligence',175],
+  ['Renovation planning',32],['Quote & scope validation',24]],
+ scatter:[['Initial renovation cost estimate',3.13,2.33,529],['Finance planning',3.48,2.72,140],
+  ['ROI / value uplift',2.72,2.25,132],['Regional pricing & spec',3.59,2.48,124],
+  ['Renovation sequencing',3.96,2.21,91],['Scope definition',3.67,2.46,76],
+  ['Scope & hidden risk',3.66,2.40,73],['Contractor quote validation',4.00,2.81,31],
+  ['General renovation research',3.20,2.20,15]],
+ obj:[['Online estimates may not be accurate enough','Show ranges, assumptions & confidence bands','high'],
+  ['Hidden work can change the budget after purchase','Position RPX as an early risk flag, not a survey','high'],
+  ['Finance & works budget are hard to plan together','Combine purchase cost, deposit & works in one view','high'],
+  ['Builder quotes vary too much','Use RPX as a quote sense-check against scope','med'],
+  ['ROI is not guaranteed after renovation','Separate cost estimate from value-uplift estimate','med']],
+ lang:[['refurbish a house',165],['off-market opportunity',14],['quotes',14],['add value',13],
+  ['hidden costs',11],['funding renovations',8],['full renovation cost',6],['quality renovation',6],['structural work',3]],
+ quotes:[
+  ['Initial renovation cost estimate','We\u2019re first-time buyers considering a house to live in long term and would love advice on renovation costs \u2014 we have no idea what a full refurb of this size realistically costs.','First-time buyer / homeowner','Neutral'],
+  ['Finance planning','Looking for advice on buying my first property \u2014 the worst house on the best street. How do people fund the purchase and the renovation together without running out of cash midway?','Landlord / BTL investor','Concerned'],
+  ['ROI / value uplift','Hoping for some wisdom \u2014 how much value does a quality renovation actually add? I don\u2019t want to overcapitalise and spend more than the house will ever be worth.','UK renovator / buyer','Concerned'],
+  ['Regional pricing & spec variability','Trying to work out how much to budget for a refurb of a 3-bed in south-west London. I know it varies wildly by area and spec \u2014 I just need a credible starting range.','UK renovator / buyer','Neutral'],
+  ['Scope & hidden risk','I thought I\u2019d budgeted pretty well for my last refurb, but wow did I underestimate. The hidden costs blindsided me \u2014 the plumbing alone was nearly \u00a33,500 over.','UK renovator / buyer','Concerned'],
+  ['Scope definition','Was wondering if you can give me a rough idea on how much a full renovation costs for a project like this \u2014 a 2-bed flat, 919 sq ft. I don\u2019t even know what work it really needs.','UK renovator / buyer','Neutral'],
+  ['Renovation sequencing','You set your budget so your top price for a house needing work is below a ready-to-move-in one \u2014 especially if the work is immediately necessary. But phasing it is the hard part.','UK renovator / buyer','Neutral'],
+  ['Contractor quote validation','The quotes I\u2019m getting back are all over the place. Did they quote materials for you as well at the start, or just labour? I can\u2019t tell which one is fair.','UK renovator / buyer','Neutral']],
+ personas:[
+  ['First-time Renovating Buyer','529 rows on cost estimates','Know true refurb cost before making an offer','Buying a money pit','See a clear cost range before you commit','Estimate my renovation cost','Google Search / Reddit','High','#1FA97E'],
+  ['Property Investor','132 rows on ROI / value','Check if works support profit or equity','Overcapitalising','Model costs and likely uplift before purchase','Check value uplift','Search / property forums','Medium','#BE8A24'],
+  ['Buy-to-let Landlord','140 rows on finance','Plan deposit, loan and works spend','Running out of cash mid-project','Plan the whole purchase and works budget','Plan my budget','Meta / Search','Medium','#3E6E9E'],
+  ['Active Renovator','31 rows on quote checks','Sense-check quotes and scope','Accepting an inflated quote','Compare quotes against a scoped estimate','Compare my quote','Search / referral','Low','#B0825A']],
+ features:[['AI renovation cost estimator',529,'MVP Core','core'],['Hidden risk & scope checker',149,'MVP Core','core'],
+  ['Renovation budget planner',140,'MVP Core','core'],['ROI / value uplift calculator',132,'MVP Add-on','add'],
+  ['Regional / spec adjustment engine',124,'MVP Add-on','add'],['Sequencing planner',91,'Later','later'],
+  ['Quote comparison tool',31,'Later','later']],
+ painfeat:[['Initial renovation cost estimate','AI renovation cost estimator','core'],
+  ['Scope & hidden risk + Scope definition','Hidden risk & scope checker','core'],
+  ['Finance planning','Renovation budget planner','core'],
+  ['ROI / value uplift','ROI / value uplift calculator','add'],
+  ['Regional pricing & spec variability','Regional / spec adjustment engine','add'],
+  ['Renovation sequencing','Sequencing planner','later'],
+  ['Contractor quote validation','Quote comparison tool','later']],
+ trendsL:["2021 Q2","2021 Q3","2021 Q4","2022 Q1","2022 Q2","2022 Q3","2022 Q4","2023 Q1","2023 Q2","2023 Q3","2023 Q4","2024 Q1","2024 Q2","2024 Q3","2024 Q4","2025 Q1","2025 Q2","2025 Q3","2025 Q4","2026 Q1","2026 Q2"],
+ trends:{
+  "home renovation":[8.5,9.5,7.5,11.2,8.9,9.7,7.8,11.6,9.3,9.3,8.9,11.8,10.5,12.3,10.8,15.3,14.7,14.8,17.7,29.7,26.2],
+  "home improvement":[29.0,29.8,27.6,34.4,30.2,31.0,27.1,32.5,29.6,47.4,35.4,33.7,30.3,30.5,28.1,37.6,35.2,33.8,38.7,57.9,55.8],
+  "roof replacement":[24.5,27.1,18.6,28.1,26.2,28.2,23.9,27.8,30.8,30.1,25.9,30.4,30.3,32.1,26.1,38.2,42.8,36.2,29.9,49.6,42.6],
+  "bathroom renovation":[6.0,6.6,5.7,7.7,7.2,6.5,6.2,8.1,7.0,7.2,7.5,10.7,9.0,10.2,10.7,12.5,11.6,11.8,11.9,17.7,16.0],
+  "kitchen remodel":[3.5,2.9,1.6,2.8,2.3,2.7,1.9,2.0,1.5,2.5,2.4,3.1,4.0,4.3,4.2,7.5,7.5,3.0,3.9,4.5,4.8]},
+ geo:{England:{hi:36,terms:{'home renovation':15,'home improvement':36,'roof replacement':35,'bathroom renovation':10,'kitchen remodel':4}},
+  Scotland:{hi:49,terms:{'home renovation':11,'home improvement':49,'roof replacement':28,'bathroom renovation':9,'kitchen remodel':3}},
+  Wales:{hi:42,terms:{'home renovation':12,'home improvement':42,'roof replacement':34,'bathroom renovation':8,'kitchen remodel':4}},
+  'N. Ireland':{hi:47,terms:{'home renovation':12,'home improvement':47,'roof replacement':27,'bathroom renovation':9,'kitchen remodel':5}}},
+ cat:[['home improvement',43.5],['roof replacement',31.0],['home renovation',12.5],['bathroom renovation',9.0],['kitchen remodel',4.0]],
+ rq:[['cost roof replacement','Roof','Cost',100],['conservatory roof replacement','Roof','Product',98],
+  ['roof replacement cost uk','Roof','Cost',26],['cost of roof replacement','Roof','Cost',20],
+  ['flat roof replacement cost','Roof','Cost',13],['bathroom renovation cost','Bathroom','Cost',62],
+  ['small bathroom renovation','Bathroom','Spec',40],['kitchen remodel cost','Kitchen','Cost',55]],
+ onsY:["1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022"],
+ onsTot:[12.69,13.0,13.05,13.46,14.03,15.23,16.93,18.36,18.92,19.39,20.36,22.18,20.7,22.28,22.28,22.6,23.67,25.59,26.18,27.12,28.74,28.83,29.37,25.88,32.08,36.0],
+ onsPriv:[7.46,7.89,7.99,8.36,8.87,10.26,11.15,11.95,12.28,12.57,13.48,14.71,13.28,14.4,15.09,14.92,16.05,17.66,18.16,19.41,21.09,21.36,21.77,19.52,25.14,28.98],
+ faY:["2008-09","2009-10","2010-11","2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23"],
+ faOwner:[20.4,24.2,19.4,23.2,23.8,24.1,23.0,23.0,24.3,22.2,34.2,27.1,34.1,30.5,33.9],
+ fa2:[['Landlord doesn\u2019t bother about repairs',28.9],['Slow to get things done',25.4],
+  ['Only does the bare minimum',13.1],['Only carries out emergency work',12.2],
+  ['Work done is of poor quality',7.3],['Other',7.0],['Difficult to contact',6.1]],
+ funnel:[['TAM','\u00a336.0bn','UK housing repair & maintenance output (ONS 2022)','#0E1A2B',100],
+  ['SAM','~\u00a37.5bn','Pre-purchase renovating-buyer spend (~21% of R&M)','#147a5b',62],
+  ['SOM (3-yr)','~\u00a36\u20139m','Realistic obtainable revenue at modest SaaS capture','#1FA97E',30]],
+ score:[['Pain intensity','Concrete, repeated, pre-purchase',88],['Market size','\u00a336bn & growing',82],
+  ['Demand signal','Rising, cost-led search',78],['Competitive gap','No fast pre-purchase tool',84],
+  ['Monetisability','Clear willingness, high-value moment',75],['Evidence confidence','4/7 streams High',82]],
+ comp:[['RPX','strong','strong','strong','strong','partial'],
+  ['Chartered surveyors','absent','partial','strong','partial','absent'],
+  ['Generic cost calculators','partial','partial','absent','absent','absent'],
+  ['Builder-quote aggregators','partial','strong','absent','partial','absent'],
+  ['Spreadsheets / DIY','partial','partial','absent','absent','partial']],
+ findings:[['The clearest problem is cost uncertainty','43.7% of all 1,211 discussions are about getting a credible renovation cost estimate before committing \u2014 a single, dominant, monetisable need.'],
+  ['The renovating buyer is the core market','878 discussions come from property renovators/buyers; the First-time Renovating Buyer is the sharpest first wedge.'],
+  ['Official data corroborates the pain','33.9% of owner-occupiers are dissatisfied with repairs (EHS); slow and bare-minimum work are top reasons \u2014 matching customer language.'],
+  ['The market is large and growing','UK housing R&M output hit \u00a336.0bn in 2022, an all-time high, with private spend up sharply.'],
+  ['Demand is rising and cost-led','Five years of search data show growing interest UK-wide; top related queries are explicitly about cost.']],
+ risks:[['Estimate accuracy scepticism','Customers doubt online estimates. Mitigate with ranges, visible assumptions and confidence bands \u2014 not false precision.'],
+  ['Single-source evidence base','The 1,211 discussions are Reddit-only. Triangulated with gov/ONS/Trends, but Day-2 ad-tests must confirm intent with real money.'],
+  ['Low measured urgency','Mean urgency is 2.39/5 \u2014 the pain is real but not always acute. Messaging must create a clear pre-offer moment of need.'],
+  ['Conversion unproven','High discussion volume \u2260 willingness to pay. The MVP must prove click + waitlist intent before estimation logic is built.'],
+  ['Crowded adjacent tools','Calculators and quote tools exist. RPX must own the fast, pre-purchase cost+risk niche, not compete on generic estimation.']],
+ next:[['1 \u00b7 Build','Landing page with the cost-estimator hero, hidden-risk and budget sections, and a waitlist CTA.','core'],
+  ['2 \u00b7 Test','Google Search + Reddit retargeting to First-time Renovating Buyers across all four nations.','core'],
+  ['3 \u00b7 Decide','Advance only on meaningful intent (clicks + waitlist), not page views. Kill-criteria set in advance.','core']],
+ mvp:[['MVP Core','core','AI renovation cost estimator \u00b7 Hidden-risk & scope checker \u00b7 Budget planner','809 discussions \u00b7 71% of evidence'],
+  ['MVP Add-on','add','ROI / value-uplift calculator \u00b7 Regional & spec adjustment','256 discussions \u00b7 21%'],
+  ['Later','later','Sequencing planner \u00b7 Quote comparison tool','122 discussions \u00b7 10%']]
+};
+/* ===================== CHART DEFAULTS ===================== */
+Chart.defaults.font.family="Inter, sans-serif";
+Chart.defaults.font.size=12;
+Chart.defaults.color="#5E6E7D";
+Chart.defaults.plugins.legend.labels.boxWidth=11;
+Chart.defaults.plugins.legend.labels.boxHeight=11;
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+Chart.defaults.plugins.legend.labels.padding=14;
+const TT={backgroundColor:'#0E1A2B',titleColor:'#fff',bodyColor:'#cdd8e2',padding:11,cornerRadius:8,
+  titleFont:{family:'Space Grotesk',size:13,weight:'600'},bodyFont:{family:'Inter',size:12},
+  displayColors:false,boxPadding:4};
+const GRID={color:'rgba(14,26,43,.06)'},GRID0={drawTicks:false};
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const charts={},rendered={};
+const PILL={core:'<span class="pill core">MVP Core</span>',add:'<span class="pill add">Add-on</span>',
+  later:'<span class="pill later">Later</span>',high:'<span class="pill high">High</span>',med:'<span class="pill med">Med</span>',low:'<span class="pill later">Low</span>'};
+const MARK={strong:'<span class="check">●</span>',partial:'<span class="partial">●</span>',absent:'<span style="color:#cabfb0">●</span>'};
+
+/* ===================== NAV ===================== */
+function go(i){
+  $$('.page').forEach(p=>p.classList.remove('show'));
+  $('#page-'+i).classList.add('show');
+  $$('.nav-btn').forEach(b=>b.classList.toggle('active',+b.dataset.p===i));
+  $('.spine').classList.remove('open');
+  $('.canvas').scrollTo?0:window.scrollTo(0,0);window.scrollTo(0,0);
+  if(!rendered[i]){render(i);rendered[i]=true;}
+}
+$$('.nav-btn').forEach(b=>b.onclick=()=>go(+b.dataset.p));
+
+/* ===================== PAGE RENDERERS ===================== */
+function render(i){[r0,r1,r2,r3,r4,r5,r6,r7][i]&&[r0,r1,r2,r3,r4,r5,r6,r7][i]();}
+
+/* ---- PAGE 1 ---- */
+function r0(){
+ charts.pain=new Chart($('#c_pain'),{type:'doughnut',
+  data:{labels:D.pain.map(p=>p[0]),datasets:[{data:D.pain.map(p=>p[1]),backgroundColor:PAINPAL,borderWidth:2,borderColor:'#fff'}]},
+  options:{cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:10.5},padding:8}},
+   tooltip:{...TT,callbacks:{label:c=>` ${c.label}: ${c.raw} (${D.pain[c.dataIndex][2]}%)`}}}}});
+ charts.seg=new Chart($('#c_seg'),{type:'bar',
+  data:{labels:D.seg.map(s=>s[0]),datasets:[{data:D.seg.map(s=>s[1]),backgroundColor:PAL.blue,borderRadius:5,barThickness:24}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw} discussions`}}},
+   scales:{x:{grid:GRID,border:GRID0},y:{grid:{display:false},border:GRID0,ticks:{font:{size:11}}}}}});
+ charts.src=new Chart($('#c_src'),{type:'bar',
+  data:{labels:D.src.map(s=>s[0]),datasets:[{data:D.src.map(s=>s[1]),backgroundColor:PAL.brass,borderRadius:5,barThickness:16}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw} sources`}}},
+   scales:{x:{grid:GRID,border:GRID0,ticks:{stepSize:1}},y:{grid:{display:false},border:GRID0,ticks:{font:{size:10}}}}}});
+ charts.sent=new Chart($('#c_sent'),{type:'doughnut',
+  data:{labels:D.sent.map(s=>s[0]),datasets:[{data:D.sent.map(s=>s[1]),backgroundColor:['#8494a2','#5E8CB5','#D45B45','#1FA97E'],borderWidth:2,borderColor:'#fff'}]},
+  options:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{size:10.5},padding:8}},tooltip:TT}}});
+}
+/* ---- PAGE 2 ---- */
+function r1(){
+ charts.painbar=new Chart($('#c_painbar'),{type:'bar',
+  data:{labels:D.pain.map(p=>p[0]),datasets:[{data:D.pain.map(p=>p[1]),backgroundColor:D.pain.map((p,i)=>i===0?PAL.green:PAL.green2),borderRadius:5,barThickness:18}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw} discussions (${D.pain[c.dataIndex][2]}%)`}}},
+   scales:{x:{grid:GRID,border:GRID0},y:{grid:{display:false},border:GRID0,ticks:{font:{size:10.5}}}}}});
+ charts.scatter=new Chart($('#c_scatter'),{type:'bubble',
+  data:{datasets:D.scatter.map((s,i)=>({label:s[0],data:[{x:s[1],y:s[2],r:Math.max(5,Math.sqrt(s[3])*1.15)}],backgroundColor:PAINPAL[i]+'cc',borderColor:PAINPAL[i],borderWidth:1}))},
+  options:{plugins:{legend:{display:false},tooltip:{...TT,callbacks:{title:c=>c[0].dataset.label,
+    label:c=>` Relevance ${c.raw.x} · Urgency ${c.raw.y}`}}},
+   scales:{x:{title:{display:true,text:'RPX Relevance (1–5) →',color:'#8494a2',font:{size:10}},min:2.4,max:4.3,grid:GRID,border:GRID0},
+    y:{title:{display:true,text:'Urgency (1–5) →',color:'#8494a2',font:{size:10}},min:2.0,max:3.0,grid:GRID,border:GRID0}}}});
+ // flow stages
+ const mx=Math.max(...D.journey.map(j=>j[1]));
+ $('#flow').innerHTML=D.journey.map(j=>`<div class="flowstage"><div class="fbar" style="width:${30+70*j[1]/mx}%;margin-inline:auto"></div><div class="fn">${j[1]}</div><div class="fl">${j[0]}</div></div>`).join('');
+ // objections
+ $('#t_obj tbody').innerHTML=D.obj.map(o=>`<tr><td class="strong">${o[0]}</td><td style="color:var(--slate)">${o[1]}</td><td>${PILL[o[2]]}</td></tr>`).join('');
+ // language
+ const lmx=Math.max(...D.lang.map(l=>l[1]));
+ $('#lang').innerHTML=D.lang.map(l=>`<div class="barrow"><div class="bl"><span class="nm">"${l[0]}"</span><span class="vl">${l[1]}×</span></div><div class="bartrack"><div class="barfill" style="width:${Math.max(4,100*l[1]/lmx)}%;background:${l[1]>50?PAL.brass:PAL.green}"></div></div></div>`).join('');
+ // quote panel
+ $('#qpnav').innerHTML=D.quotes.map((q,i)=>`<button class="qp-tab${i===0?' active':''}" data-q="${i}">${q[0]}</button>`).join('');
+ $$('.qp-tab').forEach(b=>b.onclick=()=>showQuote(+b.dataset.q));
+ showQuote(0);
+}
+function showQuote(i){const q=D.quotes[i];
+ $$('.qp-tab').forEach(b=>b.classList.toggle('active',+b.dataset.q===i));
+ $('#qptext').textContent=q[1];
+ $('#qpmeta').innerHTML=`<span class="m">${q[0]}</span><span class="m">${q[2]}</span><span class="m sent">${q[3]}</span>`;
+}
+/* ---- PAGE 3 ---- */
+function r2(){
+ $('#personas').innerHTML=D.personas.map(p=>`<div class="persona"><div class="ptop"><div class="pavatar" style="background:${p[8]}">${p[0][0]}</div><h4>${p[0]}</h4><div class="pev">${p[1]}</div></div><div class="pbody"><div class="prow"><div class="k">Main need</div><div class="v">${p[2]}</div></div><div class="prow"><div class="k">Main fear</div><div class="v">${p[3]}</div></div><div class="prow"><div class="k">Channel</div><div class="v">${p[6]}</div></div><div class="prow"><div class="k">Priority</div><div class="v">${PILL[p[7].toLowerCase()]}</div></div><div class="pcta"><span class="btn">${p[5]}</span></div></div></div>`).join('');
+ charts.persona=new Chart($('#c_persona'),{type:'bar',
+  data:{labels:D.personas.map(p=>p[0]),datasets:[{data:[529,132,140,31],backgroundColor:D.personas.map(p=>p[8]),borderRadius:6,barThickness:34}]},
+  options:{plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw} supporting discussions`}}},
+   scales:{x:{grid:{display:false},border:GRID0,ticks:{font:{size:10.5}}},y:{grid:GRID,border:GRID0}}}});
+ $('#t_goals tbody').innerHTML=D.personas.map(p=>`<tr><td class="strong">${p[0]}</td><td style="color:var(--slate)">${p[2]}</td><td style="color:var(--coral)">${p[3]}</td><td>${PILL[p[7].toLowerCase()]}</td></tr>`).join('');
+}
+/* ---- PAGE 4: MARKET DEMAND ---- */
+function r3(){
+ const TC={'home renovation':PAL.green,'home improvement':PAL.brass,'roof replacement':PAL.blue,'bathroom renovation':PAL.coral,'kitchen remodel':PAL.slate};
+ charts.trends=new Chart($('#c_trends'),{type:'line',
+  data:{labels:D.trendsL,datasets:Object.keys(D.trends).map(k=>({label:k,data:D.trends[k],borderColor:TC[k],backgroundColor:'transparent',borderWidth:2,tension:.35,pointRadius:0,pointHoverRadius:5}))},
+  options:{interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:TT},
+   scales:{x:{grid:{display:false},border:GRID0,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:8,font:{size:10}}},y:{grid:GRID,border:GRID0,title:{display:true,text:'Search index',color:'#8494a2',font:{size:10}}}}}});
+ // UK map
+ buildMap();
+ charts.cat=new Chart($('#c_cat'),{type:'bar',
+  data:{labels:D.cat.map(c=>c[0]),datasets:[{data:D.cat.map(c=>c[1]),backgroundColor:[PAL.brass,PAL.blue,PAL.green,PAL.coral,PAL.slate],borderRadius:5,barThickness:26}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` avg index ${c.raw}`}}},
+   scales:{x:{grid:GRID,border:GRID0},y:{grid:{display:false},border:GRID0,ticks:{font:{size:11}}}}}});
+ $('#t_rq tbody').innerHTML=D.rq.map(q=>`<tr><td class="strong">"${q[0]}"</td><td style="color:var(--slate)">${q[1]}</td><td>${q[2]==='Cost'?'<span class="pill high">Cost</span>':'<span class="pill med">'+q[2]+'</span>'}</td><td style="font-family:IBM Plex Mono">${q[3]}</td></tr>`).join('');
+}
+function buildMap(){
+ const paths={
+  Scotland:"M86,14 L104,8 L124,16 L130,34 L120,46 L128,60 L112,72 L96,64 L84,74 L74,56 L84,42 L78,28 Z",
+  'N. Ireland':"M30,92 L54,86 L62,104 L50,122 L28,118 L24,102 Z",
+  Wales:"M72,150 L92,146 L96,168 L84,196 L64,192 L60,166 Z",
+  England:"M96,80 L124,76 L146,96 L156,140 L146,184 L124,224 L100,230 L92,198 L80,176 L94,152 L82,128 L90,100 Z"};
+ const lbl={Scotland:[100,46],'N. Ireland':[42,106],Wales:[76,172],England:[120,150]};
+ const vals=Object.values(D.geo).map(g=>g.hi),mn=Math.min(...vals),mx=Math.max(...vals);
+ const col=v=>{const t=(v-mn)/(mx-mn||1);const c1=[227,244,238],c2=[20,122,91];
+  return`rgb(${c1.map((a,i)=>Math.round(a+(c2[i]-a)*t)).join(',')})`};
+ let svg=`<svg viewBox="0 0 180 240" width="190" style="flex-shrink:0">`;
+ for(const k in paths){const g=D.geo[k];const tip=k+' — '+Object.entries(g.terms).map(([t,v])=>t+': '+v).join(', ');
+  svg+=`<path class="region" d="${paths[k]}" fill="${col(g.hi)}" stroke="#fff" stroke-width="1.6"><title>${tip}</title></path>`;
+  svg+=`<text x="${lbl[k][0]}" y="${lbl[k][1]}" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.5" font-weight="600" fill="${g.hi>42?'#fff':'#0E1A2B'}" pointer-events="none">${g.hi}</text>`;}
+ svg+=`</svg>`;
+ const rows=Object.entries(D.geo).sort((a,b)=>b[1].hi-a[1].hi).map(([k,g])=>`<div class="barrow"><div class="bl"><span class="nm">${k}</span><span class="vl">${g.hi}</span></div><div class="bartrack"><div class="barfill" style="width:${100*g.hi/mx}%;background:${col(g.hi)}"></div></div></div>`).join('');
+ $('#ukmap').innerHTML=svg+`<div style="flex:1"><div class="barlist">${rows}</div><div class="note" style="margin-top:14px">Scotland indexes highest for "home improvement"; roof replacement peaks in England.</div></div>`;
+}
+/* ---- PAGE 5: MARKET OPPORTUNITY ---- */
+function r4(){
+ $('#funnel').innerHTML=D.funnel.map(f=>`<div class="ftier" style="background:${f[3]};width:${f[4]}%"><div class="ft-l">${f[0]}</div><div class="ft-v">${f[1]}</div><div class="ft-d">${f[2]}</div></div>`).join('');
+ $('#scorecard').innerHTML=D.score.map(s=>{const dash=2*Math.PI*16,off=dash*(1-s[2]/100);
+  return`<div class="score-item"><svg class="score-ring" width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="16" fill="none" stroke="#EBE5D7" stroke-width="4"/><circle cx="22" cy="22" r="16" fill="none" stroke="${s[2]>=82?PAL.green:s[2]>=75?PAL.brass:PAL.blue}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${off}" transform="rotate(-90 22 22)"/><text x="22" y="26" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="11" fill="#0E1A2B">${s[2]}</text></svg><div><div class="si-l">${s[0]}</div><div class="si-s">${s[1]}</div></div></div>`}).join('');
+ $('#t_comp tbody').innerHTML=D.comp.map(c=>`<tr><td class="strong"${c[0]==='RPX'?' style="color:var(--green-d)"':''}>${c[0]}</td><td>${MARK[c[1]]}</td><td>${MARK[c[2]]}</td><td>${MARK[c[3]]}</td><td>${MARK[c[4]]}</td><td>${MARK[c[5]]}</td></tr>`).join('');
+}
+/* ---- PAGE 6: PRODUCT PRIORITISATION ---- */
+function r5(){
+ const FC={core:PAL.green,add:PAL.brass,later:PAL.slate};
+ charts.feat=new Chart($('#c_feat'),{type:'bar',
+  data:{labels:D.features.map(f=>f[0]),datasets:[{data:D.features.map(f=>f[1]),backgroundColor:D.features.map(f=>FC[f[3]]),borderRadius:5,barThickness:20}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw} discussions · ${D.features[c.dataIndex][2]}`}}},
+   scales:{x:{grid:GRID,border:GRID0},y:{grid:{display:false},border:GRID0,ticks:{font:{size:10.5}}}}}});
+ $('#t_map tbody').innerHTML=D.painfeat.map(m=>`<tr><td style="color:var(--slate)">${m[0]}</td><td class="strong">${m[1]}</td><td>${PILL[m[2]]}</td></tr>`).join('');
+ $('#mvpscope').innerHTML=D.mvp.map(m=>`<div class="card" style="box-shadow:none;background:var(--card-2)"><div style="margin-bottom:10px">${PILL[m[1]]}</div><div style="font-family:Space Grotesk;font-weight:600;font-size:14px;line-height:1.4">${m[2]}</div><div class="card-sub" style="margin-top:10px;margin-bottom:0;color:var(--green-d);font-weight:600">${m[3]}</div></div>`).join('');
+}
+/* ---- PAGE 7: GOVERNMENT EVIDENCE ---- */
+function r6(){
+ charts.fa=new Chart($('#c_fa'),{type:'line',
+  data:{labels:D.faY,datasets:[{label:'Owner-occupiers dissatisfied %',data:D.faOwner,borderColor:PAL.coral,backgroundColor:'rgba(212,91,69,.10)',fill:true,borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:PAL.coral}]},
+  options:{plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw}% dissatisfied`}}},
+   scales:{x:{grid:{display:false},border:GRID0,ticks:{maxRotation:45,font:{size:9}}},y:{grid:GRID,border:GRID0,ticks:{callback:v=>v+'%'}}}}});
+ charts.fa2=new Chart($('#c_fa2'),{type:'bar',
+  data:{labels:D.fa2.map(r=>r[0]),datasets:[{data:D.fa2.map(r=>r[1]),backgroundColor:D.fa2.map((r,i)=>i<2?PAL.coral:PAL.taupe),borderRadius:5,barThickness:16}]},
+  options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw}% of dissatisfied`}}},
+   scales:{x:{grid:GRID,border:GRID0,ticks:{callback:v=>v+'%'}},y:{grid:{display:false},border:GRID0,ticks:{font:{size:9.5}}}}}});
+ charts.ons=new Chart($('#c_ons'),{type:'line',
+  data:{labels:D.onsY,datasets:[
+   {label:'Total housing R&M',data:D.onsTot,borderColor:PAL.green,backgroundColor:'rgba(31,169,126,.12)',fill:true,borderWidth:2.5,tension:.3,pointRadius:0,pointHoverRadius:5},
+   {label:'Private housing R&M',data:D.onsPriv,borderColor:PAL.brass,backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],tension:.3,pointRadius:0,pointHoverRadius:5}]},
+  options:{interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{...TT,callbacks:{label:c=>` ${c.dataset.label}: £${c.raw}bn`}}},
+   scales:{x:{grid:{display:false},border:GRID0,ticks:{maxTicksLimit:9,font:{size:10}}},y:{grid:GRID,border:GRID0,ticks:{callback:v=>'£'+v+'bn'}}}}});
+}
+/* ---- PAGE 8: RECOMMENDATION ---- */
+function r7(){
+ $('#findings').innerHTML=D.findings.map((f,i)=>`<div class="finding"><div class="fnum" style="color:var(--green)">0${i+1}</div><div><div class="ftitle">${f[0]}</div><div class="fdesc">${f[1]}</div></div></div>`).join('');
+ $('#risks').innerHTML=D.risks.map((f,i)=>`<div class="finding"><div class="fnum" style="color:var(--coral)">0${i+1}</div><div><div class="ftitle">${f[0]}</div><div class="fdesc">${f[1]}</div></div></div>`).join('');
+ $('#nextactions').innerHTML=D.next.map(n=>`<div class="card" style="box-shadow:none;background:var(--card-2)"><div style="font-family:Space Grotesk;font-weight:700;font-size:16px;color:var(--green-d);margin-bottom:8px">${n[0]}</div><div style="font-size:13px;color:var(--ink);line-height:1.55">${n[1]}</div></div>`).join('');
+}
+
+/* ===================== INIT ===================== */
+render(0);rendered[0]=true;
+</script>
+</body>
+</html>
