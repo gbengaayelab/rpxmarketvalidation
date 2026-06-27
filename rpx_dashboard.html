@@ -136,6 +136,45 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .bartrack{height:8px;background:var(--paper-2);border-radius:5px;overflow:hidden}
 .barfill{height:100%;border-radius:5px;background:var(--green)}
 
+/* ============ GOOGLE TRENDS PAGE ============ */
+.trend-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.trend-metric{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.metric-name{display:flex;align-items:center;gap:9px;font-size:11px;font-family:'IBM Plex Mono';text-transform:uppercase;letter-spacing:.12em;color:var(--slate-2);font-weight:600}
+.metric-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.metric-val{font-family:'Space Grotesk';font-size:28px;font-weight:700;color:var(--ink);margin-top:8px}
+.metric-sub{font-size:11px;color:var(--slate);margin-top:8px;line-height:1.5}
+.metric-trend{margin-top:10px;font-size:11px;font-weight:600}
+.metric-trend.up{color:var(--green)}
+.metric-trend.dn{color:var(--coral)}
+.controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:16px}
+.ctl-group{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.ctl-label{font-size:11px;font-family:'IBM Plex Mono';letter-spacing:.16em;text-transform:uppercase;color:var(--slate-2)}
+.btn-g{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font-size:12px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);cursor:pointer;transition:.15s;font-family:'Inter';font-weight:600}
+.btn:hover{background:var(--paper)}
+.btn.on{background:var(--ink);color:#fff;border-color:transparent}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:600px}
+.chart-card .chart-wrap{flex:1;position:relative}
+.annotation{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;column-gap:18px;margin-top:16px}
+.ann-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.55;color:var(--slate)}
+.ann-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.ic{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.ic-title{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.ic-body{font-size:13px;color:var(--slate);line-height:1.6}
+.section-title{font-size:11px;font-family:'IBM Plex Mono';letter-spacing:.24em;text-transform:uppercase;color:var(--slate-2);margin-bottom:12px}
+.year-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.yc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.yc-year{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.yc-rows{display:flex;flex-direction:column;gap:10px}
+.yc-row{display:grid;grid-template-columns:140px 1fr 36px;gap:10px;align-items:center}
+.yc-name{font-size:12px;color:var(--slate);white-space:nowrap}
+.yc-bar-wrap{background:var(--paper);border-radius:999px;height:8px;overflow:hidden}
+.yc-bar{height:100%;border-radius:999px}
+.yc-num{text-align:right;font-size:12px;font-weight:700;color:var(--ink)}
+@media(max-width:1200px){.trend-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.insights{grid-template-columns:repeat(2,minmax(0,1fr))}.year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.trend-metrics,.insights,.year-grid{grid-template-columns:1fr}.controls{flex-direction:column;align-items:flex-start}.chart-card{padding:16px}} 
+
 /* ============ TAGS / PILLS ============ */
 .pill{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono';font-size:10px;
   letter-spacing:.6px;text-transform:uppercase;padding:4px 9px;border-radius:20px;font-weight:600}
@@ -276,10 +315,11 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
     <button class="nav-btn" data-p="1"><span class="num">02</span> Voice of Customer</button>
     <button class="nav-btn" data-p="2"><span class="num">03</span> Customer Personas</button>
     <button class="nav-btn" data-p="3"><span class="num">04</span> Market Demand</button>
-    <button class="nav-btn" data-p="4"><span class="num">05</span> Market Opportunity</button>
-    <button class="nav-btn" data-p="5"><span class="num">06</span> Product Prioritisation</button>
-    <button class="nav-btn" data-p="6"><span class="num">07</span> Government Evidence</button>
-    <button class="nav-btn" data-p="7"><span class="num">08</span> Recommendation</button>
+    <button class="nav-btn" data-p="4"><span class="num">05</span> Google Trends</button>
+    <button class="nav-btn" data-p="5"><span class="num">06</span> Market Opportunity</button>
+    <button class="nav-btn" data-p="6"><span class="num">07</span> Product Prioritisation</button>
+    <button class="nav-btn" data-p="7"><span class="num">08</span> Government Evidence</button>
+    <button class="nav-btn" data-p="8"><span class="num">09</span> Recommendation</button>
   </nav>
   <div class="spine-foot">
     <div class="stamp-mini" onclick="go(7)">
@@ -454,10 +494,12 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
     <h1 class="ptitle">Demand is real, rising and cost-led</h1>
     <p class="psub">Five years of Google search data show steady, growing interest in renovation across every UK nation — and the language is explicitly about cost. That is exactly the demand RPX converts.</p>
   </div>
-  <div class="card" style="margin-bottom:18px">
-    <div class="card-title">Search Interest Over Time</div>
-    <div class="card-sub">UK Google Trends index, quarterly average · Jun 2021 – Jun 2026</div>
-    <div class="chart-wrap" style="height:300px"><canvas id="c_trends"></canvas></div>
+  <div class="chart-card" style="margin-bottom:18px">
+    <div style="padding:0 20px 20px">
+      <div class="card-title">Search Interest Over Time</div>
+      <div class="card-sub">UK Google Trends index, quarterly average · Jun 2021 – Jun 2026</div>
+    </div>
+    <div class="chart-wrap" style="height:520px"><canvas id="c_trends"></canvas></div>
   </div>
   <div class="grid g2" style="margin-bottom:18px">
     <div class="card">
@@ -479,10 +521,42 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
   <div class="insight"><span class="ico">Demand</span><p>The top related query for roof replacement is literally "cost roof replacement" (index 100). Search demand is problem-aware and price-anxious — a paid-search and cost-page strategy maps directly onto it.</p></div>
 </section>
 
-<!-- ============ PAGE 5: MARKET OPPORTUNITY ============ -->
+<!-- ============ PAGE 5: GOOGLE TRENDS ============ -->
 <section class="page" id="page-4">
   <div class="phead">
-    <div class="eyebrow">Page 05 · Market Opportunity</div>
+    <div class="eyebrow">Page 05 · Google Trends</div>
+    <h1 class="ptitle">UK home improvement search demand</h1>
+    <p class="psub">Five core renovation terms from Google Trends, with weekly interest, momentum, seasonality and year-over-year averages.</p>
+  </div>
+  <div class="trend-metrics" id="trendMetrics"></div>
+  <div class="controls">
+    <div class="ctl-group">
+      <span class="ctl-label">View:</span>
+      <div class="btn-g">
+        <button class="btn on" id="trendRawBtn">Weekly</button>
+        <button class="btn" id="trendSmoothBtn">4-wk avg</button>
+      </div>
+    </div>
+    <div class="ctl-group">
+      <span class="ctl-label">Highlight:</span>
+      <div class="btn-g" id="trendHighlighters"></div>
+    </div>
+  </div>
+  <div class="legend" id="trendLegend"></div>
+  <div class="chart-card" style="margin-bottom:18px">
+    <div class="chart-wrap" style="height:380px"><canvas id="c_google_trends"></canvas></div>
+    <div class="annotation" id="trendAnnotations"></div>
+  </div>
+  <p class="section-title">Key insights</p>
+  <div class="insights" id="trendInsights"></div>
+  <p class="section-title">Average interest by year</p>
+  <div class="year-grid" id="trendYearGrid"></div>
+</section>
+
+<!-- ============ PAGE 6: MARKET OPPORTUNITY ============ -->
+<section class="page" id="page-5">
+  <div class="phead">
+    <div class="eyebrow">Page 06 · Market Opportunity</div>
     <h1 class="ptitle">A large spend pool, an unfilled gap</h1>
     <p class="psub">RPX sits beside a £36bn annual UK repair-and-maintenance market. The opportunity is not to capture that spend, but to own the decision moment before it — where today's tools are slow, generic or absent.</p>
   </div>
@@ -510,9 +584,9 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
   <div class="insight green"><span class="ico">Gap</span><p>No incumbent combines speed, a credible cost range and hidden-risk flags at the pre-offer moment. Surveyors are slow and post-offer; calculators are generic; spreadsheets are manual. RPX's wedge is the fast first-pass estimate buyers ask for repeatedly.</p></div>
 </section>
 <!-- ============ PAGE 6: PRODUCT PRIORITISATION ============ -->
-<section class="page" id="page-5">
+<section class="page" id="page-6">
   <div class="phead">
-    <div class="eyebrow">Page 06 · Product Prioritisation</div>
+    <div class="eyebrow">Page 07 · Product Prioritisation</div>
     <h1 class="ptitle">What to build first</h1>
     <p class="psub">Every feature is scored on the evidence behind it. Three features clear the bar for the MVP core; the rest are sequenced as add-ons or parked. The scope is deliberately narrow and testable in days, not months.</p>
   </div>
@@ -537,9 +611,9 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
 </section>
 
 <!-- ============ PAGE 7: GOVERNMENT & INDUSTRY EVIDENCE ============ -->
-<section class="page" id="page-6">
+<section class="page" id="page-7">
   <div class="phead">
-    <div class="eyebrow">Page 07 · Government &amp; Industry Evidence</div>
+    <div class="eyebrow">Page 08 · Government &amp; Industry Evidence</div>
     <h1 class="ptitle">The pain shows up in official data too</h1>
     <p class="psub">This isn't just Reddit. The English Housing Survey and ONS construction statistics independently confirm widespread repair dissatisfaction and a large, growing spend pool — the proof investors need beyond customer chatter.</p>
   </div>
@@ -570,9 +644,9 @@ td.strong{font-weight:600;font-family:'Space Grotesk'}
 </section>
 
 <!-- ============ PAGE 8: RECOMMENDATION ============ -->
-<section class="page" id="page-7">
+<section class="page" id="page-8">
   <div class="phead">
-    <div class="eyebrow">Page 08 · Recommendation</div>
+    <div class="eyebrow">Page 09 · Recommendation</div>
     <h1 class="ptitle">The decision</h1>
     <p class="psub">Five evidence streams point the same way. The recommendation is to proceed — with a narrow, fast, falsifiable first test.</p>
   </div>
@@ -750,7 +824,7 @@ function go(i){
 $$('.nav-btn').forEach(b=>b.onclick=()=>go(+b.dataset.p));
 
 /* ===================== PAGE RENDERERS ===================== */
-function render(i){[r0,r1,r2,r3,r4,r5,r6,r7][i]&&[r0,r1,r2,r3,r4,r5,r6,r7][i]();}
+function render(i){[r0,r1,r2,r3,r4_gt,r5,r6,r7,r8][i]&&[r0,r1,r2,r3,r4_gt,r5,r6,r7,r8][i]();}
 
 /* ---- PAGE 1 ---- */
 function r0(){
@@ -824,6 +898,29 @@ function r3(){
    scales:{x:{grid:GRID,border:GRID0},y:{grid:{display:false},border:GRID0,ticks:{font:{size:11}}}}}});
  $('#t_rq tbody').innerHTML=D.rq.map(q=>`<tr><td class="strong">"${q[0]}"</td><td style="color:var(--slate)">${q[1]}</td><td>${q[2]==='Cost'?'<span class="pill high">Cost</span>':'<span class="pill med">'+q[2]+'</span>'}</td><td style="font-family:IBM Plex Mono">${q[3]}</td></tr>`).join('');
 }
+
+/* ---- PAGE 5: GOOGLE TRENDS ---- */
+function r4_gt(){
+ const labels=D.trendsL;
+ const colors={'home renovation':PAL.green,'home improvement':PAL.brass,'roof replacement':PAL.coral,'bathroom renovation':PAL.blue,'kitchen remodel':PAL.slate};
+ const dashes={'home renovation':[], 'home improvement':[6,3], 'roof replacement':[2,2], 'bathroom renovation':[8,3,2,3], 'kitchen remodel':[4,4]};
+ const series=Object.keys(D.trends).map(label=>({label,color:colors[label]||PAL.slate,dash:dashes[label]||[],data:D.trends[label]}));
+ let smooth=false, highlight='all', hidden=new Set(), chart;
+ function ma(arr,w=4){return arr.map((_,i)=>{const slice=arr.slice(Math.max(0,i-w+1),i+1);return Math.round(slice.reduce((a,b)=>a+b,0)/slice.length);});}
+ function avg(arr){return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):0;}
+ function yearSlice(arr,yr){const start=labels.findIndex(l=>l.includes(yr));const end=labels.findLastIndex(l=>l.includes(yr));return start<0?[]:arr.slice(start,end+1);}
+ function datasets(){return series.map((s,i)=>{const data=smooth?ma(s.data):s.data;const on=highlight==='all'||highlight===s.label;return{label:s.label,data,data,borderColor:on? s.color : s.color+'44',borderWidth:on?2.8:1.3,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:s.color,borderDash:s.dash,tension:smooth?0.4:0.08,fill:false,hidden:hidden.has(i)}});}
+ function buildChart(){const ctx=$('#c_google_trends'); if(chart)chart.destroy(); const isDark=window.matchMedia('(prefers-color-scheme: dark)').matches; const gridColor=isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.06)'; const tickColor=isDark?'#666660':'#aaa'; chart=new Chart(ctx,{type:'line',data:{labels, datasets:datasets()},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:isDark?'rgba(255,255,255,0.92)':'rgba(0,0,0,0.82)',titleColor:isDark?'#1a1a18':'#fff',bodyColor:isDark?'#444':'#ddd',titleFont:{size:11},bodyFont:{size:11},padding:10,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}`}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:16,maxRotation:0,font:{size:10},color:tickColor},grid:{color:gridColor},border:{color:gridColor}},y:{min:0,max:105,ticks:{font:{size:10},color:tickColor},grid:{color:gridColor},title:{display:true,text:'Search interest (0–100)',font:{size:10},color:tickColor}}}}});}
+ function buildMetrics(){const el=$('#trendMetrics'); el.innerHTML=series.map(s=>{const latest=s.data[s.data.length-1];const prev=s.data[Math.max(0,s.data.length-5)];const diff=latest-prev;const peak=Math.max(...s.data);const peakLabel=labels[s.data.indexOf(peak)]||'';const trendClass=diff>0?'up':diff<0?'dn':'';const trendText=diff>0?`▲ ${diff} vs 4wks ago`:diff<0?`▼ ${Math.abs(diff)} vs 4wks ago`:'— stable'; return `<div class="trend-metric"><div class="metric-name"><span class="metric-dot" style="background:${s.color}"></span>${s.label}</div><div class="metric-val">${latest}</div><div class="metric-sub">peak ${peak} · ${peakLabel}</div><div class="metric-trend ${trendClass}">${trendText}</div></div>`;}).join('');}
+ function buildLegend(){const el=$('#trendLegend'); el.innerHTML=series.map((s,i)=>`<div class="li${hidden.has(i)?' off':''}" data-i="${i}"><span class="lsq" style="background:${s.color}"></span>${s.label}</div>`).join(''); Array.from(el.querySelectorAll('.li')).forEach(b=>b.onclick=()=>{const i=+b.dataset.i; hidden.has(i)?hidden.delete(i):hidden.add(i); buildLegend(); buildChart();});}
+ function buildHighlighters(){const opts=['all',...series.map(s=>s.label)]; const labels=['All','Renovation','Improvement','Roof','Bathroom','Kitchen']; const el=$('#trendHighlighters'); el.innerHTML=opts.map((o,i)=>`<button class="btn${highlight===o?' on':''}" data-h="${o}">${labels[i]||o}</button>`).join(''); Array.from(el.querySelectorAll('button')).forEach(b=>b.onclick=()=>{highlight=b.dataset.h;buildHighlighters();buildChart();});}
+ function buildAnnotations(){const el=$('#trendAnnotations'); const events=[{color:colors['roof replacement'],label:'Jan 2026 — Roof replacement hits the highest peak, reflecting storm-driven urgency.'},{color:colors['home improvement'],label:'Aug 2023 — Home improvement spikes, showing broad mid-market renovation demand.'},{color:colors['home renovation'],label:'Mar 2026 — Home renovation climbs steadily, signalling sustained planning interest.'},{color:colors['kitchen remodel'],label:'Kitchen remodel remains low-volume, suggesting it is a narrower niche term.'}]; el.innerHTML=events.map(e=>`<div class="ann-item"><span class="ann-dot" style="background:${e.color}"></span><span>${e.label}</span></div>`).join('');}
+ function buildInsights(){const el=$('#trendInsights'); const insights=[{title:'Roof replacement dominates',body:'The highest-interest term through the full period, peaking strongest and reflecting urgent repair demand.'},{title:'Home improvement is broadest',body:'A stable, high-volume term that shows the largest general search audience for renovation services.'},{title:'Home renovation growth is structural',body:'Steady upward momentum from 2024 onward suggests an expanding market for pre-purchase planning.'},{title:'Kitchen remodel is niche',body:'Consistently low relative interest means kitchen-specific language is less useful for early testing.'},{title:'Seasonality is clear',body:'Most terms peak in summer and early spring, while winter months are softer except for roof-related urgency.'},{title:'Bathroom renovation is steady',body:'A quieter but growing signal, useful as a supporting demand theme rather than the primary lead.'}]; el.innerHTML=insights.map(item=>`<div class="ic"><div class="ic-title">${item.title}</div><div class="ic-body">${item.body}</div></div>`).join('');}
+ function buildYearGrid(){const el=$('#trendYearGrid'); const years=['2021','2022','2023','2024','2025','2026']; const maxAvg=Math.max(...series.map(s=>Math.max(...years.map(y=>avg(yearSlice(s.data,y)))))); el.innerHTML=years.map(y=>{const rows=series.map(s=>{const a=avg(yearSlice(s.data,y)); const pct=maxAvg?Math.round((a/maxAvg)*100):0; return `<div class="yc-row"><span class="yc-name" style="color:${s.color}">${s.label}</span><div class="yc-bar-wrap"><div class="yc-bar" style="width:${pct}%;background:${s.color}88"></div></div><span class="yc-num">${a}</span></div>`;}).join(''); return `<div class="yc"><div class="yc-year">${y}</div><div class="yc-rows">${rows}</div></div>`;}).join('');}
+ function setSmooth(v){smooth=v; $('#trendRawBtn').className='btn'+(v?'':' on'); $('#trendSmoothBtn').className='btn'+(v?' on':''); buildChart();}
+ $('#trendRawBtn').onclick=()=>setSmooth(false); $('#trendSmoothBtn').onclick=()=>setSmooth(true);
+ buildMetrics(); buildHighlighters(); buildLegend(); buildChart(); buildAnnotations(); buildInsights(); buildYearGrid();}
+
 function buildMap(){
  const paths={
   Scotland:"M86,14 L104,8 L124,16 L130,34 L120,46 L128,60 L112,72 L96,64 L84,74 L74,56 L84,42 L78,28 Z",
@@ -843,14 +940,14 @@ function buildMap(){
  $('#ukmap').innerHTML=svg+`<div style="flex:1"><div class="barlist">${rows}</div><div class="note" style="margin-top:14px">Scotland indexes highest for "home improvement"; roof replacement peaks in England.</div></div>`;
 }
 /* ---- PAGE 5: MARKET OPPORTUNITY ---- */
-function r4(){
+function r5(){
  $('#funnel').innerHTML=D.funnel.map(f=>`<div class="ftier" style="background:${f[3]};width:${f[4]}%"><div class="ft-l">${f[0]}</div><div class="ft-v">${f[1]}</div><div class="ft-d">${f[2]}</div></div>`).join('');
  $('#scorecard').innerHTML=D.score.map(s=>{const dash=2*Math.PI*16,off=dash*(1-s[2]/100);
   return`<div class="score-item"><svg class="score-ring" width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="16" fill="none" stroke="#EBE5D7" stroke-width="4"/><circle cx="22" cy="22" r="16" fill="none" stroke="${s[2]>=82?PAL.green:s[2]>=75?PAL.brass:PAL.blue}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${off}" transform="rotate(-90 22 22)"/><text x="22" y="26" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="11" fill="#0E1A2B">${s[2]}</text></svg><div><div class="si-l">${s[0]}</div><div class="si-s">${s[1]}</div></div></div>`}).join('');
  $('#t_comp tbody').innerHTML=D.comp.map(c=>`<tr><td class="strong"${c[0]==='RPX'?' style="color:var(--green-d)"':''}>${c[0]}</td><td>${MARK[c[1]]}</td><td>${MARK[c[2]]}</td><td>${MARK[c[3]]}</td><td>${MARK[c[4]]}</td><td>${MARK[c[5]]}</td></tr>`).join('');
 }
 /* ---- PAGE 6: PRODUCT PRIORITISATION ---- */
-function r5(){
+function r6(){
  const FC={core:PAL.green,add:PAL.brass,later:PAL.slate};
  charts.feat=new Chart($('#c_feat'),{type:'bar',
   data:{labels:D.features.map(f=>f[0]),datasets:[{data:D.features.map(f=>f[1]),backgroundColor:D.features.map(f=>FC[f[3]]),borderRadius:5,barThickness:20}]},
@@ -860,7 +957,7 @@ function r5(){
  $('#mvpscope').innerHTML=D.mvp.map(m=>`<div class="card" style="box-shadow:none;background:var(--card-2)"><div style="margin-bottom:10px">${PILL[m[1]]}</div><div style="font-family:Space Grotesk;font-weight:600;font-size:14px;line-height:1.4">${m[2]}</div><div class="card-sub" style="margin-top:10px;margin-bottom:0;color:var(--green-d);font-weight:600">${m[3]}</div></div>`).join('');
 }
 /* ---- PAGE 7: GOVERNMENT EVIDENCE ---- */
-function r6(){
+function r7(){
  charts.fa=new Chart($('#c_fa'),{type:'line',
   data:{labels:D.faY,datasets:[{label:'Owner-occupiers dissatisfied %',data:D.faOwner,borderColor:PAL.coral,backgroundColor:'rgba(212,91,69,.10)',fill:true,borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:PAL.coral}]},
   options:{plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw}% dissatisfied`}}},
@@ -877,7 +974,7 @@ function r6(){
    scales:{x:{grid:{display:false},border:GRID0,ticks:{maxTicksLimit:9,font:{size:10}}},y:{grid:GRID,border:GRID0,ticks:{callback:v=>'£'+v+'bn'}}}}});
 }
 /* ---- PAGE 8: RECOMMENDATION ---- */
-function r7(){
+function r8(){
  $('#findings').innerHTML=D.findings.map((f,i)=>`<div class="finding"><div class="fnum" style="color:var(--green)">0${i+1}</div><div><div class="ftitle">${f[0]}</div><div class="fdesc">${f[1]}</div></div></div>`).join('');
  $('#risks').innerHTML=D.risks.map((f,i)=>`<div class="finding"><div class="fnum" style="color:var(--coral)">0${i+1}</div><div><div class="ftitle">${f[0]}</div><div class="fdesc">${f[1]}</div></div></div>`).join('');
  $('#nextactions').innerHTML=D.next.map(n=>`<div class="card" style="box-shadow:none;background:var(--card-2)"><div style="font-family:Space Grotesk;font-weight:700;font-size:16px;color:var(--green-d);margin-bottom:8px">${n[0]}</div><div style="font-size:13px;color:var(--ink);line-height:1.55">${n[1]}</div></div>`).join('');
